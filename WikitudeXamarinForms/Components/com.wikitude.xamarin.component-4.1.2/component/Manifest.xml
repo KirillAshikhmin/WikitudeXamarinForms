@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<component format="1" id="com.wikitude.xamarin.component">
+  <name>Augmented Reality Wikitude SDK</name>
+  <publisher>Wikitude GmbH</publisher>
+  <publisher-url>https://www.wikitude.com</publisher-url>
+  <version>4.1.2</version>
+  <summary>Augmented Reality Component for the Wikitude SDK.</summary>
+  <screenshots>
+    <img src="screenshots/xamarin_slide.jpg" title="xamarin_slide" />
+    <img src="screenshots/xamarin_blog_hero.jpg" title="xamarin_blog_hero" />
+    <img src="screenshots/WT_HG_Developer_Overview_IMG.png" title="WT_HG_Developer_Overview_IMG" />
+  </screenshots>
+  <samples>
+    <sample id="WikitudeSampleAndroid">
+      <name>WikitudeSampleAndroid</name>
+      <summary>WikitudeSampleAndroid</summary>
+    </sample>
+    <sample id="WikitudeSDKExample">
+      <name>WikitudeSampleiOS</name>
+      <summary>WikitudeSampleiOS</summary>
+    </sample>
+  </samples>
+</component>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="architectOnCreateError">\nYour device does not support all required features. \n(GPS enabled and Compass for Geo / Camera for 2d Tracking)</string>
+</resources>
