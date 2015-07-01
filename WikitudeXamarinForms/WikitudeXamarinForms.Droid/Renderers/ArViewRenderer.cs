@@ -32,56 +32,33 @@ namespace WikitudeXamarinForms.Droid.Renderers
         protected override void OnElementChanged(ElementChangedEventArgs<ArView> e)
         {
             base.OnElementChanged(e);
-            Log.Error("Wikitude", "OnElementChanged");
 
-            if (_architectView == null)
+            var config = new StartupConfiguration(Const.WikitudeSdkKey, StartupConfiguration.Features.Geo);
+            const int requiredFeatures = StartupConfiguration.Features.Geo;
+
+            if ((ArchitectView.getSupportedFeaturesForDevice(Application.Context) & requiredFeatures) ==
+                requiredFeatures)
             {
-                Log.Error("Wikitude", "_architectView null ");
                 _architectView = new ArchitectView(Context);
-                isDestroyed = false;
+
                 SetNativeControl(_architectView);
-                var config = new StartupConfiguration(Const.WikitudeSdkKey, StartupConfiguration.Features.Geo);
-                const int requiredFeatures = StartupConfiguration.Features.Geo;
+                _architectView.OnCreate(config);
+                _architectView.RegisterSensorAccuracyChangeListener(this);
+                _architectView.RegisterUrlListener(this);
+                _architectView.ScrollBarStyle = ScrollbarStyles.OutsideOverlay;
+                _architectView.ScrollBarSize = 0;
 
-                if ((ArchitectView.getSupportedFeaturesForDevice(Application.Context) & requiredFeatures) ==
-                    requiredFeatures)
-                {
-                    _architectView.OnCreate(config);
-                    _architectView.RegisterSensorAccuracyChangeListener(this);
-                    _architectView.RegisterUrlListener(this);
-                    _architectView.ScrollBarStyle = ScrollbarStyles.OutsideOverlay;
-                    //_architectView.ScrollBarSize = 0;
+                _architectView.SetLocation(e.NewElement.Position.Latitude, e.NewElement.Position.Longitude, 10f);
+                _architectView.OnPostCreate();
 
-                    _architectView.SetLocation(e.NewElement.Position.Latitude, e.NewElement.Position.Longitude, 10f);
-                    _architectView.OnPostCreate();
-
-                    _architectView.Load("AR/index.html");
-                    if (e.NewElement.State)
-                        _architectView.OnResume();
-                    Element.Supported(true);
-                }
-                else
-                {
-                    _architectView = null;
-                    Element.Supported(false);
-                }
+                _architectView.Load("AR/index.html");
+                _architectView.OnResume();
             }
             else
             {
-                if (e.NewElement == null) return;
-                if (_architectView == null) return;
-                _architectView.SetLocation(e.NewElement.Position.Latitude, e.NewElement.Position.Longitude, 10f);
-
-                if (e.NewElement.State)
-                {
-                    _architectView.OnResume();
-                }
-                else
-                {
-                    Destroy();
-                }
+                _architectView = null;
+                Element.OnDeviceNotSupported();
             }
-
         }
 
         protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -89,17 +66,8 @@ namespace WikitudeXamarinForms.Droid.Renderers
             base.OnElementPropertyChanged(sender, e);
             try
             {
-                if (e == null) return;
-                Log.Error("Wikitude", "OnElementPropertyChanged " + e.PropertyName);
-
                 if (_architectView == null) return;
-                if (e.PropertyName == ArView.StateProperty.PropertyName)
-                {
-                    if (Element.State)
-                        _architectView.OnResume();
-                    else Destroy();
-                    return;
-                }
+
                 if (e.PropertyName == ArView.PositionProperty.PropertyName)
                 {
                     _architectView.SetLocation(Element.Position.Latitude, Element.Position.Longitude, 10f);
@@ -142,25 +110,18 @@ namespace WikitudeXamarinForms.Droid.Renderers
             var data = Tools.ParseQueryString(new Uri(url));
             if (data == null || !data.ContainsKey("id")) return false;
             Element.InvokeItemClicked(String.Format("Open {0} with id={1}", System.Net.WebUtility.UrlDecode(data["title"]), data["id"]));
-
-            Destroy();
             return false;
         }
 
-        private bool isDestroyed = false;
-        private async void Destroy()
-        {
-            Log.Error("WikitudeTest", "Destroy " + isDestroyed);
-
-            if (isDestroyed || _architectView == null) return;
-            isDestroyed = true;
-            _architectView.OnPause();
-            _architectView.UnregisterSensorAccuracyChangeListener(this);
-            _architectView.OnDestroy();
-            _architectView = null;
-            //await Task.Delay(500);
-            Dispose(true);
-        }
+//        private void Destroy()
+//        {
+//            _architectView.OnPause();
+//            _architectView.UnregisterSensorAccuracyChangeListener(this);
+////            _architectView.OnDestroy();
+//            _architectView = null;
+//            //await Task.Delay(500);
+//            Dispose(true);
+//        }
 
         protected override void Dispose(bool disposing)
         {
@@ -168,6 +129,7 @@ namespace WikitudeXamarinForms.Droid.Renderers
             {
                 if (_architectView != null)
                 {
+                    _architectView.OnPause();
                     _architectView.UnregisterSensorAccuracyChangeListener(this);
                     _architectView.OnDestroy();
                 }

@@ -9,6 +9,7 @@ using Wikitude.Demo.Model;
 using WikitudeXamarinForms.Controls;
 using WikitudeXamarinForms.Services;
 using Xamarin.Forms;
+using Xamarin.Forms.Maps;
 using Position = Geolocator.Plugin.Abstractions.Position;
 
 namespace WikitudeXamarinForms.Pages
@@ -21,12 +22,10 @@ namespace WikitudeXamarinForms.Pages
         public ArPage(IEnumerable<PoiModel> pois)
         {
             InitializeComponent();
-            Debug.WriteLine("new ArPage");
             _pois = pois;
 
             Title = "AR";
             _initDone = false;
-           // Open.Command = new Command(() => Navigation.PushAsync(new ArPage(App.Points)));
         }
 
 
@@ -35,15 +34,11 @@ namespace WikitudeXamarinForms.Pages
             base.OnAppearing();
             if (!_initDone)
                 await Task.Run(async () => await InitPage());
-            Debug.WriteLine("OnAppearing");
 
         }
 
         protected override void OnDisappearing()
         {
-            ArViewer.State = false;
-            _initDone = false;
-            Debug.WriteLine("OnDisappearing");
             DependencyService.Get<IPlatformService>().HideLoading();
             base.OnDisappearing();
         }
@@ -54,25 +49,9 @@ namespace WikitudeXamarinForms.Pages
 
             if (_pois == null) return;
 
-            var supported = await ArViewer.SupportedTask.Task;
-            Debug.WriteLine(supported ? "Supported" : "UnSupported");
-            if (!supported)
-            {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    Navigation.PopAsync(true);
-                    Application.Current.MainPage.DisplayAlert("Localization.Error_Title",
-                        "Localization.Error_AR_Unsupported",
-                        "Localization.Error_Btn_Ok");
-                });
-                return;
-            }
-
             DependencyService.Get<IPlatformService>().ShowLoading("Detect Location");
 
             Position position = null;
-
-            ArViewer.State = true;
 
             try
             {
@@ -93,6 +72,7 @@ namespace WikitudeXamarinForms.Pages
                 });
                 return;
             }
+
             ArViewer.Position = position;
             Debug.WriteLine("Current pos = " + position.Latitude + ", " + position.Longitude+" / "+position.Altitude);
             var pois = (from poi in _pois let distance = poi.DistanceTo(position.Latitude, position.Longitude) where distance <= 10000 select poi).ToList();
@@ -136,16 +116,21 @@ namespace WikitudeXamarinForms.Pages
                             XAlign = TextAlignment.Center,
                             Text = o.ToString()
                         },
-                        new Button
-                        {
-                            Text = "Open Next Instance Wikitude",
-                            Command = new Command(() => Navigation.PushAsync(new ArPage(App.Points)))
-                        }
+                        new Map()
                     }
                     }
                 });
 
             }); 
+        }
+
+        private async void OnDeviceNotSupported(object sender, EventArgs e)
+        {
+            await Application.Current.MainPage.DisplayAlert("Localization.Error_Title",
+                "Localization.Error_AR_Unsupported",
+                "Localization.Error_Btn_Ok");
+
+            await Navigation.PopAsync(true);
         }
     }
 }

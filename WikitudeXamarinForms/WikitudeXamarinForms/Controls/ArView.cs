@@ -15,9 +15,7 @@ namespace WikitudeXamarinForms.Controls
 {
     public class ArView : View
     {
-
-
-        public TaskCompletionSource<bool> SupportedTask = new TaskCompletionSource<bool>();
+        public event EventHandler DeviceNotSupported;
 
         public static BindableProperty ItemsProperty = BindableProperty.Create<ArView, IEnumerable<PoiModel>>(o => o.Items, default(IEnumerable<PoiModel>));
 
@@ -36,22 +34,22 @@ namespace WikitudeXamarinForms.Controls
             set { SetValue(ItemClickedCommandProperty, value); }
         }
 
-        public new static readonly BindableProperty StateProperty =
-            BindableProperty.Create<ArView, bool>(
-                p => p.State, false);
-
-
-        public new bool State
-        {
-            get
-            {
-                return (bool)GetValue(StateProperty);
-            }
-            set
-            {
-                SetValue(StateProperty, value);
-            }
-        }
+//        public static readonly BindableProperty StateProperty =
+//            BindableProperty.Create<ArView, bool>(
+//                p => p.State, false);
+//
+//
+//        public bool State
+//        {
+//            get
+//            {
+//                return (bool)GetValue(StateProperty);
+//            }
+//            set
+//            {
+//                SetValue(StateProperty, value);
+//            }
+//        }
 
         public new static readonly BindableProperty PositionProperty =
          BindableProperty.Create<ArView, Position>(
@@ -91,10 +89,10 @@ namespace WikitudeXamarinForms.Controls
             WidthRequest = 20;
         }
 
-        public void Supported(bool b)
+        public virtual void OnDeviceNotSupported()
         {
-            Debug.WriteLine("Is support know: " + b);
-            SupportedTask.SetResult(b);
+            var handler = DeviceNotSupported;
+            if (handler != null) handler(this, EventArgs.Empty);
         }
     }
 }

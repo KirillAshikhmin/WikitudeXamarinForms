@@ -4,5 +4,5 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:WikitudeXamarinForms.Controls;assembly=WikitudeXamarinForms"
              Title="Wikitude AR">
-  <controls:ArView x:Name="ArViewer" />
+  <controls:ArView x:Name="ArViewer" DeviceNotSupported="OnDeviceNotSupported"/>
 </ContentPage>
