@@ -1,6 +1,7 @@
 var kMarker_AnimationDuration_ChangeDrawable = 500;
 var kMarker_AnimationDuration_Resize = 1000;
 
+var currentMarkerOrder = 0;
 function Marker(poiData) {
 
     this.poiData = poiData;
@@ -18,7 +19,7 @@ function Marker(poiData) {
     var markerLocation = new AR.GeoLocation(poiData.latitude, poiData.longitude, poiData.altitude);
 
     // create an AR.ImageDrawable for the marker in idle state
-    this.markerDrawable_idle = new AR.ImageDrawable(World.markerDrawable_idle, 7.5, {
+    this.markerDrawable_idle = new AR.ImageDrawable(World.markerDrawable_idle, 4.5, {
         zOrder: 0,
         opacity: 1.0,
         /*
@@ -28,51 +29,51 @@ function Marker(poiData) {
     });
 
     // create an AR.ImageDrawable for the marker in selected state
-    this.markerDrawable_selected = new AR.ImageDrawable(World.markerDrawable_selected, 7.5, {
+    this.markerDrawable_selected = new AR.ImageDrawable(World.markerDrawable_selected, 4.5, {
         zOrder: 0,
         opacity: 0.0,
         onClick: null
     });
 
     // create an AR.ImageDrawable for the marker in selected state
-    this.markerDrawable_distance = new AR.ImageDrawable(World.markerDrawable_distance, 0.2, {
+    this.markerDrawable_distance = new AR.ImageDrawable(World.markerDrawable_distance, 0.3, {
         zOrder: 1,
         opacity: 1.0,
-        offsetY: 0.5,
-        offsetX: -1.0,
+        offsetY: 0.9,
+        offsetX: -0.6,
         onClick: null
     });
 
     // create an AR.ImageDrawable for the marker in selected state
-    this.markerDrawable_icon = new AR.ImageDrawable(poiData.type==="House"?World.markerDrawable_house:World.markerDrawable_museum, 1.2, {
+    this.markerDrawable_icon = new AR.ImageDrawable(poiData.type==="House"?World.markerDrawable_house:World.markerDrawable_museum, 0.6, {
         zOrder: 1,
         opacity: 1.0,
-        offsetY: 2.0,
+        offsetY: 1.6,
         onClick: null
     });
 
     // create an AR.Label for the marker's title 
-    this.title1Label = new AR.Label(poiData.title.trunc2(18), 1, {
+    this.title1Label = new AR.Label(poiData.title.trunc2(16), 0.6, {
         zOrder: 1,
-        offsetY: -0.5,
+        offsetY: 0.2,
         style: {
             textColor: '#333333'
         }
     });
 
-    this.title2Label = new AR.Label(poiData.title.trunc3(18), 1, {
+    this.title2Label = new AR.Label(poiData.title.trunc3(16), 0.6, {
         zOrder: 1,
-        offsetY: -1.5,
+        offsetY: -0.8,
         style: {
             textColor: '#333333'
         }
     });
 
     // create an AR.Label for the marker's description
-    this.distanceLabel = new AR.Label(poiData.distance, 0.8, {
+    this.distanceLabel = new AR.Label(poiData.distance, 0.6, {
         zOrder: 1,
-        offsetY: 0.5,
-        offsetX: 1.0,
+        offsetY: 0.9,
+        offsetX: 0.8,
         style: {
             textColor: '#ff6a5c',
             fontStyle: AR.CONST.FONT_STYLE.BOLD
@@ -112,9 +113,8 @@ Marker.prototype.getOnClickTrigger = function(marker) {
 
         if (!Marker.prototype.isAnyAnimationRunning(marker)) {
             if (marker.isSelected) {
-
                 Marker.prototype.setDeselected(marker);
-
+                World.onMarkerDeselected(marker);
             } else {
                 Marker.prototype.setSelected(marker);
                 try {
@@ -133,14 +133,34 @@ Marker.prototype.getOnClickTrigger = function(marker) {
     };
 };
 
+//Marker.prototype.moveUp = function (marker) {
+//    marker.markerObject.location.altitude = 1000;
+//}
+//
+//Marker.prototype.moveDown = function (marker) {
+//    marker.markerObject.location.altitude = 100;
+//}
+
 /*
     Property Animations allow constant changes to a numeric value/property of an object, dependent on start-value, end-value and the duration of the animation. Animations can be seen as functions defining the progress of the change on the value. The Animation can be parametrized via easing curves.
 */
-
 Marker.prototype.setSelected = function(marker) {
 
     marker.isSelected = true;
-
+   
+   // marker.zIndex = 100;
+ 
+  //  marker.poiData.altitude = 400;
+    /*
+    for (i = 0; i < World.markerList.length; i++) {
+        var newLocation2 = World.markerList[i].markerLocation;
+        var distanceUpdate2 = (newLocation2.distanceToUser() > 999) ? ((newLocation2.distanceToUser() / 1000).toFixed(2) + " km") : (Math.round(newLocation2.distanceToUser()) + " m");
+       // World.markerList[i].poiData.distance = distanceUpdate2;
+        World.markerList[i].distanceLabel.text = distanceUpdate2;
+    }
+   */
+   // console.log("prototype select current marker 1 " + marker.markerObject.drawables.cam[0].zOrder);
+    //marker.zOrder = 10000;
     // New: 
     if (marker.animationGroup_selected === null) {
 
@@ -158,34 +178,38 @@ Marker.prototype.setSelected = function(marker) {
             amplitude: 2.0
         }));
         // create AR.PropertyAnimation that animates the scaling of the title label to 1.2
-        var titleLabelResizeAnimation = new AR.PropertyAnimation(marker.title1Label, 'scaling', null, 1.2, kMarker_AnimationDuration_Resize, new AR.EasingCurve(AR.CONST.EASING_CURVE_TYPE.EASE_OUT_ELASTIC, {
-            amplitude: 2.0
-        }));
-        // create AR.PropertyAnimation that animates the scaling of the description label to 1.2
-        var descriptionLabelResizeAnimation = new AR.PropertyAnimation(marker.title2Label, 'scaling', null, 1.2, kMarker_AnimationDuration_Resize, new AR.EasingCurve(AR.CONST.EASING_CURVE_TYPE.EASE_OUT_ELASTIC, {
-            amplitude: 2.0
-        }));
+//        var titleLabelResizeAnimation = new AR.PropertyAnimation(marker.titleLabel, 'scaling', null, 1.2, kMarker_AnimationDuration_Resize, new AR.EasingCurve(AR.CONST.EASING_CURVE_TYPE.EASE_OUT_ELASTIC, {
+//            amplitude: 2.0
+//        }));
+//        // create AR.PropertyAnimation that animates the scaling of the description label to 1.2
+//        var descriptionLabelResizeAnimation = new AR.PropertyAnimation(marker.descriptionLabel, 'scaling', null, 1.2, kMarker_AnimationDuration_Resize, new AR.EasingCurve(AR.CONST.EASING_CURVE_TYPE.EASE_OUT_ELASTIC, {
+//            amplitude: 2.0
+//        }));
 
         /*
             There are two types of AR.AnimationGroups. Parallel animations are running at the same time, sequentials are played one after another. This example uses a parallel AR.AnimationGroup.
         */
-        marker.animationGroup_selected = new AR.AnimationGroup(AR.CONST.ANIMATION_GROUP_TYPE.PARALLEL, [hideIdleDrawableAnimation, showSelectedDrawableAnimation, idleDrawableResizeAnimation, selectedDrawableResizeAnimation, titleLabelResizeAnimation, descriptionLabelResizeAnimation]);
+        marker.animationGroup_selected = new AR.AnimationGroup(AR.CONST.ANIMATION_GROUP_TYPE.PARALLEL, [hideIdleDrawableAnimation, showSelectedDrawableAnimation, idleDrawableResizeAnimation, selectedDrawableResizeAnimation]);
     }
 
     // removes function that is set on the onClick trigger of the idle-state marker
     marker.markerDrawable_idle.onClick = null;
-    // sets the click trigger function for the selected state marker
+//    // sets the click trigger function for the selected state marker
     marker.markerDrawable_selected.onClick = Marker.prototype.getOnClickTrigger(marker);
-
-    // enables the direction indicator drawable for the current marker
-    marker.directionIndicatorDrawable.enabled = true;
-    // starts the selected-state animation
+//
+//    // enables the direction indicator drawable for the current marker
+    marker.directionIndicatorDrawable.enabled = false;
+//    // starts the selected-state animation
     marker.animationGroup_selected.start();
 };
 
 Marker.prototype.setDeselected = function(marker) {
-
+    marker.markerObject.renderingOrder = 0;
     marker.isSelected = false;
+    //alert("prototype setDeselected current marker " + marker.zOrder + " ? " + marker.zIndex);
+   // marker.zIndex = 0;
+   // marker.zOrder = 10000;
+    // New: 
 
     if (marker.animationGroup_idle === null) {
 
@@ -206,24 +230,24 @@ Marker.prototype.setDeselected = function(marker) {
 //            amplitude: 2.0
 //        }));
         // create AR.PropertyAnimation that animates the scaling of the description label to 1.0
-        var descriptionLabelResizeAnimation = new AR.PropertyAnimation(marker.descriptionLabel, 'scaling', null, 1.0, kMarker_AnimationDuration_Resize, new AR.EasingCurve(AR.CONST.EASING_CURVE_TYPE.EASE_OUT_ELASTIC, {
-            amplitude: 2.0
-        }));
+//        var descriptionLabelResizeAnimation = new AR.PropertyAnimation(marker.descriptionLabel, 'scaling', null, 1.0, kMarker_AnimationDuration_Resize, new AR.EasingCurve(AR.CONST.EASING_CURVE_TYPE.EASE_OUT_ELASTIC, {
+//            amplitude: 2.0
+//        }));
 
         /*
             There are two types of AR.AnimationGroups. Parallel animations are running at the same time, sequentials are played one after another. This example uses a parallel AR.AnimationGroup.
         */
-        marker.animationGroup_idle = new AR.AnimationGroup(AR.CONST.ANIMATION_GROUP_TYPE.PARALLEL, [showIdleDrawableAnimation, hideSelectedDrawableAnimation, idleDrawableResizeAnimation, selectedDrawableResizeAnimation, descriptionLabelResizeAnimation]);
+        marker.animationGroup_idle = new AR.AnimationGroup(AR.CONST.ANIMATION_GROUP_TYPE.PARALLEL, [showIdleDrawableAnimation, hideSelectedDrawableAnimation, idleDrawableResizeAnimation, selectedDrawableResizeAnimation]);
     }
 
     // sets the click trigger function for the idle state marker
     marker.markerDrawable_idle.onClick = Marker.prototype.getOnClickTrigger(marker);
-    // removes function that is set on the onClick trigger of the selected-state marker
+//    // removes function that is set on the onClick trigger of the selected-state marker
     marker.markerDrawable_selected.onClick = null;
-
-    // disables the direction indicator drawable for the current marker
+//
+//    // disables the direction indicator drawable for the current marker
     marker.directionIndicatorDrawable.enabled = false;
-    // starts the idle-state animation
+//    // starts the idle-state animation
     marker.animationGroup_idle.start();
 };
 

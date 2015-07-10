@@ -11,9 +11,11 @@ var World = {
 	markerDrawable_selected: null,
 	markerDrawable_directionIndicator: null,
 
+	markerListUnclustered: [],
 	// list of AR.GeoObjects that are currently shown in the scene / World
 	markerList: [],
-
+	lat: 0,
+    lon: 0,
 	// The last selected marker
 	currentMarker: null,
 
@@ -35,31 +37,53 @@ var World = {
 
 		// loop through POI-information and create an AR.GeoObject (=Marker) per POI
 		for (var currentPlaceNr = 0; currentPlaceNr < poiData.length; currentPlaceNr++) {
+
 			var singlePoi = {
 				"id": poiData[currentPlaceNr].id,
 				"latitude": parseFloat(poiData[currentPlaceNr].latitude),
 				"longitude": parseFloat(poiData[currentPlaceNr].longitude),
 				"altitude": parseFloat(poiData[currentPlaceNr].altitude),
+				//"altitude": altitude,
 				"title": poiData[currentPlaceNr].name,
 				"description": poiData[currentPlaceNr].description,
 				"distance": poiData[currentPlaceNr].distance,
 				"type": poiData[currentPlaceNr].type
 			};
-			
+
 			/*
 				To be able to deselect a marker while the user taps on the empty screen, 
 				the World object holds an array that contains each marker.
 			*/
 			World.markerList.push(new Marker(singlePoi));
-			
+			//World.markerListUnclustered.push(singlePoi);
 		}
-		console.log(poiData.length + " places loaded");
-		World.updateStatusMessage(poiData.length + " places loaded");
+/*
+		console.log(World.markerListUnclustered.length + " Unclustered places loaded");
+
+		World.placeGeoObjects = ClusterHelper.createClusteredPlaces(20, World.lat, World.lon, World.markerListUnclustered);
+		console.log(World.placeGeoObjects.length + " Clustered placeGeoObjects");
+
+	    //go through all clusters
+		for (var i = 0; i < World.placeGeoObjects.length; i++) {
+		    //go through all items in each cluster
+		    for (var j = 0; j < World.placeGeoObjects[i].places.length; j++) {
+
+		        singlePoi = World.placeGeoObjects[i].places[j];
+		        // the singlePoi altitude is originally 0 
+		        // it will be increased by 250 for each item remaining in the cluster
+		        singlePoi.altitude = j * 250;
+		        // Add pois to World
+		        World.markerList.push(new Marker(singlePoi));
+		    }
+		}*/
+
+		console.log(World.markerList.length + " places loaded");
+		World.updateStatusMessage(currentPlaceNr + ' places loaded');
 	},
 
 	// updates status message shon in small "i"-button aligned bottom center
 	updateStatusMessage: function updateStatusMessageFn(message, isWarning) {
-
+	    return;
 		var themeToUse = isWarning ? "e" : "c";
 		var iconToUse = isWarning ? "alert" : "info";
 
@@ -75,6 +99,9 @@ var World = {
 	// location updates, fired every time you call architectView.setLocation() in native environment
 	locationChanged: function locationChangedFn(lat, lon, alt, acc) {
 
+	    World.lat = lat;
+	    World.lon = lon;
+	    console.log("Current pos=" + lat + ", " + lon);
 		/*
 			The custom function World.onLocationChanged checks with the flag World.initiallyLoadedData if the function was already called. With the first call of World.onLocationChanged an object that contains geo information will be created which will be later used to create a marker using the World.loadPoisFromJsonData function.
 		*/
@@ -89,21 +116,29 @@ var World = {
 
 	// fired when user pressed maker in cam
 	onMarkerSelected: function onMarkerSelectedFn(marker) {
+	    if (World.currentMarker) {
+	        World.currentMarker.setDeselected(World.currentMarker);
+	    }
 
-		// deselect previous marker
-		if (World.currentMarker) {
-			if (World.currentMarker.poiData.id == marker.poiData.id) {
-				return;
-			}
-			World.currentMarker.setDeselected(World.currentMarker);
-		}
+	        marker.setSelected(marker);
+	        World.currentMarker = marker;
+	    
+	        marker.markerObject.renderingOrder = 1000;
+	},
 
-		// highlight current one
-		marker.setSelected(marker);
-		World.currentMarker = marker;
-	    var currentMarker = World.currentMarker;
-	    var architectSdkUrl = "architectsdk://markerselected?id=" + encodeURIComponent(currentMarker.poiData.id) + "&title=" + encodeURIComponent(currentMarker.poiData.title) + "&description=" + encodeURIComponent(currentMarker.poiData.description);
-	    document.location = architectSdkUrl;
+	onMarkerDeselected: function onMarkerDeselectedFn(marker) {
+	    // deselect previous marker
+	    marker.markerObject.renderingOrder = 0;
+	    if (World.currentMarker) {
+	        if (World.currentMarker.poiData.id == marker.poiData.id) {
+//	            marker.moveDown();
+	            World.currentMarker = marker;
+	            var locationUrl = 'architectsdk://markerselected?id=' + encodeURIComponent(marker.poiData.id) + '&type=' + encodeURIComponent(marker.poiData.type);
+	            document.location.href = locationUrl;
+	            marker.setDeselected(marker);
+	            return;
+	        }
+	    }
 	},
 	// screen was clicked but no geo-object was hit
 	onScreenClick: function onScreenClickFn() {
@@ -124,7 +159,7 @@ var World = {
 				"latitude": (centerPointLatitude + (Math.random() / 5 - 0.1)),
 				"description": ("This is the description of POI#" + (i + 1)),
 				// use this value to ignore altitude information in general - marker will always be on user-level
-				"altitude": AR.CONST.UNKNOWN_ALTITUDE,
+				"altitude": 0,
 				"name": ("POI#" + (i + 1))
 			});
 		}

@@ -107,10 +107,10 @@ Global
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.AppStore|x86.ActiveCfg = Release|iPhone
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Debug|Any CPU.ActiveCfg = Release|iPhone
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Debug|ARM.ActiveCfg = Release|iPhone
-		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Debug|iPhone.ActiveCfg = Release|iPhone
+		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Debug|iPhone.ActiveCfg = Debug|iPhone
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Debug|iPhone.Build.0 = Debug|iPhone
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Debug|iPhoneSimulator.ActiveCfg = Release|iPhone
-		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Debug|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
+		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Debug|iPhoneSimulator.Build.0 = Release|iPhone
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Debug|Mixed Platforms.ActiveCfg = Release|iPhone
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Debug|Mixed Platforms.Build.0 = Debug|iPhone
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Debug|x86.ActiveCfg = Release|iPhone
@@ -118,6 +118,7 @@ Global
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Release|ARM.ActiveCfg = Release|iPhone
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Release|iPhone.ActiveCfg = Release|iPhone
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Release|iPhone.Build.0 = Release|iPhone
+		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Release|iPhone.Deploy.0 = Release|iPhone
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
 		{58265880-7EB7-492C-AF3C-FE359B1FE001}.Release|Mixed Platforms.ActiveCfg = Release|iPhone

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Geolocator.Plugin;
+using PCLStorage;
 using Wikitude.Demo.Model;
 using WikitudeXamarinForms.Controls;
 using WikitudeXamarinForms.Services;
@@ -13,17 +15,15 @@ using Position = Geolocator.Plugin.Abstractions.Position;
 
 namespace WikitudeXamarinForms.Pages
 {
-    public partial class ArPage : ContentPage
+    public partial class RecognizePage : ContentPage
     {
-        private readonly IEnumerable<PoiModel> _pois;
         private bool _initDone;
 
-        public ArPage(IEnumerable<PoiModel> pois)
+        public RecognizePage()
         {
             InitializeComponent();
-            _pois = pois;
 
-            Title = "AR";
+            Title = "Recognize";
             _initDone = false;
         }
 
@@ -32,7 +32,7 @@ namespace WikitudeXamarinForms.Pages
         {
             base.OnAppearing();
             if (!_initDone)
-                await Task.Run(async () => await InitPage());
+                await Task.Run(() => InitPage());
 
         }
 
@@ -42,59 +42,19 @@ namespace WikitudeXamarinForms.Pages
             base.OnDisappearing();
         }
 
-        private async Task InitPage()
+        private void InitPage()
         {
             _initDone = true;
 
-            if (_pois == null) return;
+            DependencyService.Get<IPlatformService>().ShowLoading("Recognize init");
 
-            DependencyService.Get<IPlatformService>().ShowLoading("Detect Location");
-
-            Position position = null;
-
-            try
-            {
-                position = await CrossGeolocator.Current.GetPositionAsync(20000);
-            }
-            catch (Exception ignoredException)
-            {
-                Debug.WriteLine(ignoredException.Message);
-            }
-
-            if (position == null)
-            {
-
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    DependencyService.Get<IPlatformService>().HideLoading();
-                    Application.Current.MainPage.DisplayAlert("Error", "Location error", "Ok");
-                });
-                return;
-            }
-
-            ArViewer.Position = position;
-            Debug.WriteLine("Current pos = " + position.Latitude + ", " + position.Longitude+" / "+position.Altitude);
-            var pois = (from poi in _pois let distance = poi.DistanceTo(position.Latitude, position.Longitude) where distance <= 10000 select poi).ToList();
-
-            await Task.Delay(500);
-            if (pois.Count == 0)
-            {
-                Debug.WriteLine("No objects");
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    DependencyService.Get<IPlatformService>().HideLoading();
-                    Application.Current.MainPage.DisplayAlert("Error", "No objects", "Ok");
-
-                });
-                return;
-            }
-
-            ArViewer.Items = pois.OrderBy(p => p.NumberDistance);
-            ArViewer.ItemClickedCommand = new Command(ArItemClickedCommandExecute);
+            RecognizeViewer.ItemClickedCommand = new Command(ArItemClickedCommandExecute);
 
             Debug.WriteLine("Page Init");
             DependencyService.Get<IPlatformService>().HideLoading();
         }
+
+     
 
         private void ArItemClickedCommandExecute(object o)
         {

@@ -45,7 +45,6 @@ namespace WikitudeXamarinForms
 
             MainPage = new NavigationPage(new ContentPage
             {
-                
                 Content = new StackLayout
                 {
                     VerticalOptions = LayoutOptions.Center,
@@ -56,8 +55,13 @@ namespace WikitudeXamarinForms
 						},
                         new Button
                         {
-                            Text = "Open  Wikitude",
+                            Text = "Open  Wikitude AR",
                             Command =  new Command (()=>((NavigationPage)MainPage).PushAsync(new ArPage(Points)))
+                        },
+                        new Button
+                        {
+                            Text = "Open  Wikitude Recognize",
+                            Command =  new Command (()=>((NavigationPage)MainPage).PushAsync(new RecognizePage()))
                         }
 					}
                 }
